@@ -1,13 +1,17 @@
-<form action="" method="get" class="form-example">
-    <div class="form-example">
-        <label for="url">Введите ссылку на репозиторий на GitHub: </label>
-        <input type="url" name="url" id="url" required>
-    </div>
-    <div class="form-example">
-        <label for="branch">Введите название ветки: </label>
-        <input type="text" name="branch" id="branch" required>
-    </div>
-    <div class="form-example">
-        <input type="submit" value="Отправить">
-    </div>
-</form>
+<script src="web/resources/js/login.js" type="text/javascript"></script>
+
+<div class="form-example">
+    <label for="url">Введите ссылку на репозиторий на GitHub: </label>
+    <input type="url" name="url" id="url" required>
+</div>
+<div class="form-example">
+    <label for="branch">Введите название ветки: </label>
+    <input type="text" name="branch" id="branch" required>
+</div>
+<div class="form-example">
+    <label for="path_to_file">Введите путь до файла: </label>
+    <input type="text" name="path_to_file" id="path_to_file" required>
+</div>
+<div class="form-example">
+    <input type="submit" value="Отправить" onclick="sendJSON()">
+</div>

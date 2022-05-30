@@ -11,11 +11,12 @@ from starlette import status
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
+from web.src.models.login_info import LoginInfo
 from web.src.models.solution import Solution
 from web.src.state.state import get_state, State
 from web.src.utils.diff2HtmlCompare.diff2HtmlCompare import compare
 from web.src.utils.diff_utils import get_file_content
-from web.src.utils.fork_utils import download_solutions, parse_url, ParseException
+from web.src.utils.fork_utils import ParseException
 
 router = APIRouter(prefix="")
 
@@ -24,28 +25,30 @@ templates = Jinja2Templates(directory="web/resources/templates")
 
 @router.get("/")
 async def root(state: State = Depends(get_state)):
-    if state.logged_in():
+    if state.is_authenticated():
         return fastapi.responses.RedirectResponse("/solutions", status_code=starlette.status.HTTP_302_FOUND)
     return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
 
 
 @router.get("/login")
-async def login(request: Request, url: str = None, branch: str = None, state: State = Depends(get_state)):
-    if state.logged_in():
-        return fastapi.responses.RedirectResponse("/solutions", status_code=starlette.status.HTTP_302_FOUND)
-    if url and branch:
-        try:
-            username, repository_name = parse_url(url, "https://github.com/")
-            state.solutions = download_solutions(username, repository_name, branch, state.folder)
-        except (ParseException or RequestException):
-            return templates.TemplateResponse("index.html", {"request": request, "title": "Вход", "body": "login"})
+async def get_login_page(request: Request, state: State = Depends(get_state)):
+    if state.is_authenticated():
         return fastapi.responses.RedirectResponse("/solutions", status_code=starlette.status.HTTP_302_FOUND)
     return templates.TemplateResponse("index.html", {"request": request, "title": "Вход", "body": "login"})
 
 
+@router.post("/login")
+async def login(request: Request, login_info: LoginInfo, state: State = Depends(get_state)):
+    try:
+        state.login(login_info)
+    except (ParseException or RequestException):
+        return templates.TemplateResponse("index.html", {"request": request, "title": "Вход", "body": "login"})
+    return fastapi.responses.JSONResponse(content="")
+
+
 @router.get("/exit")
 async def exit(request: Request, choice: str = None, state: State = Depends(get_state)):
-    if not state.logged_in():
+    if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
     if choice and choice == "Да":
         state.clear()
@@ -59,14 +62,14 @@ async def exit(request: Request, choice: str = None, state: State = Depends(get_
 async def get_solutions(request: Request,
                         solution_numbers: list[int] = Query(default=None, alias="checkbox"),
                         state: State = Depends(get_state)):
-    if not state.logged_in():
+    if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
     if solution_numbers and -1 in solution_numbers:
         solution_numbers.remove(-1)
     if solution_numbers and len(solution_numbers) == 2:
         solutions: List[Solution] = [state.solutions[i] for i in solution_numbers]
-        first_solution = os.path.join(solutions[0].folder_with_solution, "task06-fp-yat", "Yat.hs")
-        second_solution = os.path.join(solutions[1].folder_with_solution, "task06-fp-yat", "Yat.hs")
+        first_solution = os.path.join(solutions[0].folder_with_solution, state.path_to_file)
+        second_solution = os.path.join(solutions[1].folder_with_solution, state.path_to_file)
         diff_html = compare(
             first_solution,
             second_solution,
@@ -105,20 +108,20 @@ def to_fixed(numObj, digits=0):
 
 @router.get("/table")
 async def get_comparison_table(request: Request, state: State = Depends(get_state)):
-    if not state.logged_in():
+    if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
     comparison_table = [[""] + list(map(lambda solution: solution.owner, state.solutions))]
     sequence_matcher = SequenceMatcher()
     for row_num, first_solution in enumerate(state.solutions):
         row = [first_solution.owner]
-        first_path = os.path.join(first_solution.folder_with_solution, "task06-fp-yat", "Yat.hs")
+        first_path = os.path.join(first_solution.folder_with_solution, state.path_to_file)
         first_solution_content = get_file_content(first_path)
         sequence_matcher.set_seq1(first_solution_content)
         for col_num, second_solution in enumerate(state.solutions):
             if row_num == col_num:
                 row.append("")
                 continue
-            second_path = os.path.join(second_solution.folder_with_solution, "task06-fp-yat", "Yat.hs")
+            second_path = os.path.join(second_solution.folder_with_solution, state.path_to_file)
             second_solution_content = get_file_content(second_path)
             sequence_matcher.set_seq2(second_solution_content)
             row.append(to_fixed(sequence_matcher.ratio(), digits=2))
