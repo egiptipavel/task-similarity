@@ -1,0 +1,10 @@
+<input type="submit" value="Назад" onclick="window.location.href = '/solutions'">
+<table border="1" width="100%">
+    {% for row in comparison_table %}
+    <tr>
+        {% for col in row %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>

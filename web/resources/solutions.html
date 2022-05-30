@@ -1,0 +1,36 @@
+<style>
+    label {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 0 0 10px;
+        display: block;
+    }
+
+    label:hover {
+        background: #eee;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function toggle(source) {
+        const checkboxes = document.getElementsByName('checkbox');
+        for (let i = 0, n = checkboxes.length; i < n; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+</script>
+
+<input type="submit" value="Таблица сравнения" onclick="window.location.href = '/table'">
+<input type="submit" value="Выйти" onclick="window.location.href = '/exit'">
+<form action="" method="get" class="form-example">
+    <input type="submit" value="Сравнить">
+    <div>
+        <label><input type="checkbox" name="checkbox" value=-1 onclick="toggle(this)">Выбрать все</label>
+    </div>
+    {% for i, solution in solutions %}
+    <div>
+        <label><input type="checkbox" name="checkbox" value={{i}}> {{solution.owner}}</label>
+    </div>
+    {% endfor %}
+</form>
