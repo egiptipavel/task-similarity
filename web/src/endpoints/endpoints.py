@@ -19,7 +19,7 @@ from web.src.utils.fork_utils import download_solutions, parse_url, ParseExcepti
 
 router = APIRouter(prefix="")
 
-templates = Jinja2Templates(directory="web/resources")
+templates = Jinja2Templates(directory="web/resources/templates")
 
 
 @router.get("/")
@@ -81,15 +81,21 @@ async def get_solutions(request: Request,
     )
 
 
-@router.get("/web/resources/deps/{path}")
-async def get_resource_file(path: str):
-    full_path = os.path.join("web", "resources", "deps", path)
+@router.get("/web/resources/css/{path}")
+async def get_css_file(path: str):
+    full_path = os.path.join("web", "resources", "css", path)
     return fastapi.responses.FileResponse(full_path)
 
 
-@router.get("/web/resources/deps/codeformats/{path}")
-async def get_resource_file(path: str):
-    full_path = os.path.join("web", "resources", "deps", "codeformats", path)
+@router.get("/web/resources/js/{path}")
+async def get_js_file(path: str):
+    full_path = os.path.join("web", "resources", "js", path)
+    return fastapi.responses.FileResponse(full_path)
+
+
+@router.get("/web/resources/css/codeformats/{path}")
+async def get_css_codeformats_file(path: str):
+    full_path = os.path.join("web", "resources", "css", "codeformats", path)
     return fastapi.responses.FileResponse(full_path)
 
 

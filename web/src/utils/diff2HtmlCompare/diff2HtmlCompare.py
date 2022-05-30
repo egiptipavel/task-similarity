@@ -265,11 +265,11 @@ class Diff(object):
     Manages a pair of source files and generates a single html diff page comparing
     the contents.
     """
-    pygmentsCssFile = "web/resources/deps/codeformats/%s.css"
-    diffCssFile = "web/resources/deps/diff.css"
-    diffJsFile = "web/resources/deps/diff.js"
-    resetCssFile = "web/resources/deps/reset.css"
-    jqueryJsFile = "web/resources/deps/jquery.min.js"
+    pygmentsCssFile = "web/resources/css/codeformats/%s.css"
+    diffCssFile = "web/resources/css/diff.css"
+    diffJsFile = "web/resources/js/diff.js"
+    resetCssFile = "web/resources/css/reset.css"
+    jqueryJsFile = "web/resources/js/jquery.min.js"
 
     def __init__(self, from_file: str, to_file: str, first_owner: str, second_owner: str):
         self.from_file = from_file
