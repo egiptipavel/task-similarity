@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from web.src.models.login_info import LoginInfo
+from web.src.models.solution import Solution
 from web.src.utils.fork_utils import parse_url, download_solutions
 
 
@@ -10,13 +11,16 @@ class State:
 
     def __init__(self):
         self.folder = "tmp"
-        path_to_folder = Path(self.folder)
-        if path_to_folder.exists():
-            shutil.rmtree(path_to_folder, ignore_errors=True)
+        # path_to_folder = Path(self.folder)
+        # if path_to_folder.exists():
+        #     shutil.rmtree(path_to_folder, ignore_errors=True)
         self.path_to_file = ""
         self.solutions = []
+        self.comparison_table = []
 
-        self.logged_in = False
+        self.logged_in = True
+        self.path_to_file = "task06-fp-yat/Yat.hs"
+        self.solutions = [Solution(f, os.path.join(self.folder, f)) for f in os.listdir(self.folder)]
 
     def login(self, login_info: LoginInfo):
         path_to_folder = Path(self.folder)
@@ -39,6 +43,7 @@ class State:
     def clear(self):
         shutil.rmtree(self.folder, ignore_errors=True)
         self.solutions = []
+        self.comparison_table = []
         self.logged_in = False
 
 

@@ -1,5 +1,4 @@
 import os.path
-from difflib import SequenceMatcher
 from typing import List, Tuple
 
 import fastapi
@@ -15,7 +14,7 @@ from web.src.models.login_info import LoginInfo
 from web.src.models.solution import Solution
 from web.src.state.state import get_state, State
 from web.src.utils.diff2HtmlCompare.diff2HtmlCompare import compare
-from web.src.utils.diff_utils import get_file_content
+from web.src.utils.diff_utils import create_comparison_table
 from web.src.utils.fork_utils import ParseException
 
 router = APIRouter(prefix="")
@@ -102,30 +101,13 @@ async def get_css_codeformats_file(path: str):
     return fastapi.responses.FileResponse(full_path)
 
 
-def to_fixed(numObj, digits=0):
-    return f"{numObj:.{digits}f}"
-
-
 @router.get("/table")
 async def get_comparison_table(request: Request, state: State = Depends(get_state)):
     if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
-    comparison_table = [[""] + list(map(lambda solution: solution.owner, state.solutions))]
-    sequence_matcher = SequenceMatcher()
-    for row_num, first_solution in enumerate(state.solutions):
-        row = [first_solution.owner]
-        first_path = os.path.join(first_solution.folder_with_solution, state.path_to_file)
-        first_solution_content = get_file_content(first_path)
-        sequence_matcher.set_seq1(first_solution_content)
-        for col_num, second_solution in enumerate(state.solutions):
-            if row_num == col_num:
-                row.append("")
-                continue
-            second_path = os.path.join(second_solution.folder_with_solution, state.path_to_file)
-            second_solution_content = get_file_content(second_path)
-            sequence_matcher.set_seq2(second_solution_content)
-            row.append(to_fixed(sequence_matcher.ratio(), digits=2))
-        comparison_table.append(row)
+    if not state.comparison_table:
+        state.comparison_table = create_comparison_table(state.solutions, state.path_to_file)
+    comparison_table = state.comparison_table
     return templates.TemplateResponse(
         "index.html",
         {"request": request, "title": "Вход", "body": "table", "comparison_table": comparison_table}
