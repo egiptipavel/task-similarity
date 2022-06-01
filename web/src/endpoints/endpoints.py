@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 import fastapi
 import starlette
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Body
 from fastapi.responses import HTMLResponse
 from requests.exceptions import RequestException
 from starlette import status
@@ -46,15 +46,20 @@ async def login(request: Request, login_info: LoginInfo, state: State = Depends(
 
 
 @router.get("/exit")
-async def exit(request: Request, choice: str = None, state: State = Depends(get_state)):
+async def get_exit_page(request: Request, state: State = Depends(get_state)):
     if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
-    if choice and choice == "Да":
-        state.clear()
+    return templates.TemplateResponse("index.html", {"request": request, "title": "Вход", "body": "exit"})
+
+
+@router.post("/exit")
+async def exit(choice: bool = Body(False, embed=True), state: State = Depends(get_state)):
+    if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
     if choice:
-        return fastapi.responses.RedirectResponse("/solutions", status_code=starlette.status.HTTP_302_FOUND)
-    return templates.TemplateResponse("index.html", {"request": request, "title": "Вход", "body": "exit"})
+        state.clear()
+        return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
+    return fastapi.responses.RedirectResponse("/solutions", status_code=starlette.status.HTTP_302_FOUND)
 
 
 @router.get("/solutions")
