@@ -16,7 +16,7 @@ class State:
         #     shutil.rmtree(path_to_folder, ignore_errors=True)
         self.path_to_file = ""
         self.solutions = []
-        self.comparison_table = []
+        self.similarity_table = []
 
         self.logged_in = True
         self.path_to_file = "task06-fp-yat/Yat.hs"
@@ -43,7 +43,7 @@ class State:
     def clear(self):
         shutil.rmtree(self.folder, ignore_errors=True)
         self.solutions = []
-        self.comparison_table = []
+        self.similarity_table = []
         self.logged_in = False
 
 

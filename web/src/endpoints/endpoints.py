@@ -14,7 +14,7 @@ from web.src.models.login_info import LoginInfo
 from web.src.models.solution import Solution
 from web.src.state.state import get_state, State
 from web.src.utils.diff2HtmlCompare.diff2HtmlCompare import compare
-from web.src.utils.diff_utils import create_comparison_table
+from web.src.utils.diff_utils import create_similarity_table
 from web.src.utils.fork_utils import ParseException
 
 router = APIRouter(prefix="")
@@ -106,14 +106,14 @@ async def get_css_codeformats_file(path: str):
     return fastapi.responses.FileResponse(full_path)
 
 
-@router.get("/table")
-async def get_comparison_table(request: Request, state: State = Depends(get_state)):
+@router.get("/table/similarity")
+async def get_similarity_table(request: Request, state: State = Depends(get_state)):
     if not state.is_authenticated():
         return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
-    if not state.comparison_table:
-        state.comparison_table = create_comparison_table(state.solutions, state.path_to_file)
-    comparison_table = state.comparison_table
+    if not state.similarity_table:
+        state.similarity_table = create_similarity_table(state.solutions, state.path_to_file)
+    similarity_table = state.similarity_table
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "title": "Вход", "body": "table", "comparison_table": comparison_table}
+        {"request": request, "title": "Вход", "body": "similarity_table", "similarity_table": similarity_table}
     )

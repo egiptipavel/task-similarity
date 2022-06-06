@@ -15,8 +15,8 @@ def to_fixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 
-def create_comparison_table(solutions: List[Solution], path_to_file: str):
-    comparison_table = [[""] + list(map(lambda solution: solution.owner, solutions))]
+def create_similarity_table(solutions: List[Solution], path_to_file: str):
+    similarity_table = [[""] + list(map(lambda solution: solution.owner, solutions))]
     sequence_matcher = SequenceMatcher()
     regex_to_remove_comments = r'[\t\s]*--.*\n'
     for row_num, first_solution in enumerate(solutions):
@@ -34,5 +34,5 @@ def create_comparison_table(solutions: List[Solution], path_to_file: str):
             second_solution_content = [re.sub(regex_to_remove_comments, '\n', line) for line in second_solution_content]
             sequence_matcher.set_seq2(second_solution_content)
             row.append(to_fixed(sequence_matcher.ratio(), digits=2))
-        comparison_table.append(row)
-    return comparison_table
+        similarity_table.append(row)
+    return similarity_table
