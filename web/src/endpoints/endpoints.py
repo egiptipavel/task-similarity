@@ -14,7 +14,8 @@ from web.src.models.login_info import LoginInfo
 from web.src.models.solution import Solution
 from web.src.state.state import get_state, State
 from web.src.utils.diff2HtmlCompare.diff2HtmlCompare import compare
-from web.src.utils.diff_utils import create_similarity_table
+from web.src.utils.diff_utils import create_jaro_sim_table
+from web.src.utils.diff_utils import create_similarity_table, create_cosine_similarity_table
 from web.src.utils.fork_utils import ParseException
 
 router = APIRouter(prefix="")
@@ -115,5 +116,41 @@ async def get_similarity_table(request: Request, state: State = Depends(get_stat
     similarity_table = state.similarity_table
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "title": "Вход", "body": "similarity_table", "similarity_table": similarity_table}
+        {"request": request, "title": "Вход", "body": "table", "table": similarity_table}
+    )
+
+
+@router.get("/table/cosine_similarity")
+async def get_cosine_semantic_similarity_table(request: Request, state: State = Depends(get_state)):
+    if not state.is_authenticated():
+        return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
+    if not state.cosine_similarity_table:
+        state.cosine_similarity_table = create_cosine_similarity_table(state.solutions, state.path_to_file)
+    cosine_similarity_table = state.cosine_similarity_table
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Вход",
+            "body": "table",
+            "table": cosine_similarity_table
+        }
+    )
+
+
+@router.get("/table/jaro_similatiry")
+async def get_jaro_sim_table(request: Request, state: State = Depends(get_state)):
+    if not state.is_authenticated():
+        return fastapi.responses.RedirectResponse("/login", status_code=starlette.status.HTTP_302_FOUND)
+    if not state.jaro_sim_table:
+        state.jaro_sim_table = create_jaro_sim_table(state.solutions, state.path_to_file)
+    jaro_sim_table = state.jaro_sim_table
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Вход",
+            "body": "table",
+            "table": jaro_sim_table
+        }
     )

@@ -17,6 +17,8 @@ class State:
         self.path_to_file = ""
         self.solutions = []
         self.similarity_table = []
+        self.cosine_similarity_table = []
+        self.jaro_sim_table = []
 
         self.logged_in = True
         self.path_to_file = "task06-fp-yat/Yat.hs"
@@ -44,6 +46,8 @@ class State:
         shutil.rmtree(self.folder, ignore_errors=True)
         self.solutions = []
         self.similarity_table = []
+        self.cosine_similarity_table = []
+        self.jaro_sim_table = []
         self.logged_in = False
 
 
